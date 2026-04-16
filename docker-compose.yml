@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    environment:
+      - BLUESKY_HANDLE=${BLUESKY_HANDLE}
+      - BLUESKY_PASSWORD=${BLUESKY_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: user_thumalien
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: bluesky_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_thumalien -d bluesky_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
