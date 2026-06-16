@@ -47,7 +47,7 @@ Projet-etude/
 │   ├── init_db.py                   # Initialisation PostgreSQL
 │   ├── clean_labeled_data.py        # Nettoyage données labellisées
 │   ├── infer_topic.py               # Inférence topics (BERTopic)
-│   ├── train_nlp.py                 # Fine-tuning sentiment (🔴 Anass)
+│   ├── train_nlp.py                 # Fine-tuning sentiment
 │   ├── export_model_artifacts.py    # Export métriques & diagrammes
 │   ├── api_sentiment.py             # API REST sentiment (port 5000)
 │   └── api_topic.py                 # API REST topics (port 6000)
