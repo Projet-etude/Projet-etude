@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-06-16T17:43:52.635002",
+  "model": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+  "task": "sentiment_classification",
+  "final_metrics": {
+    "eval_accuracy": 0.7115151515151515,
+    "eval_f1_macro": 0.6655989754070726,
+    "eval_f1_weighted": 0.7083292604421273,
+    "eval_runtime": 180.4662,
+    "eval_samples_per_second": 4.571,
+    "eval_steps_per_second": 0.576
+  },
+  "training_epochs": 3.0,
+  "best_model_checkpoint": "models\\sentiment\\checkpoint-824"
+}

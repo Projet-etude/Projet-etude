@@ -1,0 +1,16 @@
+{
+  "model_path": "C:\\Users\\anass\\Projet-etude\\models\\sentiment",
+  "model_type": "sentiment_classifier",
+  "tokenizer": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+  "labels": [
+    "N\u00e9gatif",
+    "Neutre",
+    "Positif"
+  ],
+  "artifacts": {
+    "loss_plot": "training_loss.png",
+    "metrics_plot": "training_metrics.png",
+    "metrics_json": "metrics.json",
+    "label_map": "label_map.txt"
+  }
+}

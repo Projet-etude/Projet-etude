@@ -29,8 +29,8 @@ Thumbs.db
 .env
 
 # Modèles IA
-models/
-checkpoint-*/
+models/sentiment/checkpoint-*/
+models/topic
 
 # Fichiers de modèles
 *.safetensors
@@ -56,13 +56,13 @@ wandb/
 mlruns/
 
 # Données volumineuses (à adapter)
-data/raw/
-data/intermediate/
-data/*.csv
-data/**/*.csv
+#data/raw/
+#data/intermediate/
+#data/*.csv
+#data/**/*.csv
 
-data/*.parquet
-data/*.db
+#data/*.parquet
+#data/*.db
 
 # Fichiers temporaires
 tmp/

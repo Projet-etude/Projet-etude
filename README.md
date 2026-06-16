@@ -1,10 +1,10 @@
 # 📘 Projet Thumalien
 
-# 🛰️ Détection de Fake News & Analyse Sentiment sur Bluesky
+# 🛰️ Analyse de Sentiment et Topic Modeling sur Bluesky
 
 ## 🧭 Présentation du projet
 
-Thumalien est une solution complète d'analyse automatisée des messages publiés sur **Bluesky** pour détecter la désinformation et analyser les sentiments.
+Thumalien est une solution complète d'analyse automatisée des messages publiés sur **Bluesky** pour analyser les sentiments et extraire des topics.
 
 Le projet combine :
 - **Collecte de données** : récupération des posts Bluesky en temps réel
