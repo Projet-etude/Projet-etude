@@ -58,15 +58,23 @@ Projet-etude/
 │   ├── labeled_data_clean.csv       # Données labellisées nettoyées
 │   └── labeled_data_with_topics.csv # Avec topics inférés
 ├── models/
-│   └── sentiment/
-│       ├── pytorch_model.bin        # Modèle fine-tuné
-│       ├── config.json
-│       ├── tokenizer_config.json
-│       └── export/                  # 🌐 Pour le web
-│           ├── config.json
-│           ├── metrics.json         # Métriques JSON
-│           ├── training_loss.png    # Diagramme
-│           └── training_metrics.png # Diagramme
+│   ├── sentiment/
+│   │   ├── checkpoint-1236/         # Checkpoints (poids + états)
+│   │   │   ├── model.safetensors    # Poids du modèle
+│   │   │   ├── config.json
+│   │   │   ├── tokenizer.json
+│   │   │   └── trainer_state.json
+│   │   ├── checkpoint-824/          # Ancien checkpoint
+│   │   │   ├── model.safetensors
+│   │   │   └── trainer_state.json
+│   │   ├── label_map.txt
+│   │   └── export/                  # 🌐 Pour le web / export d'artifacts
+│   │       ├── config.json
+│   │       ├── metrics.json         # Métriques JSON
+│   │       ├── training_loss.png    # Diagramme
+│   │       └── training_metrics.png # Diagramme
+│   └── topic/
+│       └── bertopic_model/          # Modèle BERTopic pour infer_topic
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
@@ -208,15 +216,87 @@ python src/train_nlp.py \
 **Output généré** :
 ```
 models/sentiment/
-├── pytorch_model.bin
-├── config.json
-├── trainer_state.json
+├── checkpoint-1236/
+│   ├── model.safetensors
+│   ├── config.json
+│   ├── tokenizer.json
+│   └── trainer_state.json
+├── checkpoint-824/
+│   ├── model.safetensors
+│   └── trainer_state.json
+├── label_map.txt
 └── export/
-    ├── config.json
-    ├── metrics.json
-    ├── training_loss.png
-    └── training_metrics.png
+  ├── config.json
+  ├── metrics.json
+  ├── training_loss.png
+  └── training_metrics.png
 ```
+
+Note : le checkpoint `checkpoint-1236` est le plus récent — pour partager le modèle, zippe ce dossier (`models/sentiment/checkpoint-1236`) et fournis le lien au reste de l'équipe.
+
+## 🔒 Modèles externes (non poussés dans le dépôt)
+
+Les fichiers de modèles (checkpoints, poids) sont volumineux et ne sont pas inclus dans le repo. Fournis des liens (Google Drive / OneDrive / Dropbox) vers les archives `.zip` et demande aux membres de :
+
+- télécharger l'archive fournie
+- la décompresser dans le répertoire du projet en respectant l'arborescence ci-dessous
+
+Arborescence attendue après extraction :
+
+```
+models/
+├── sentiment/
+│   └── checkpoint-1236/   # contient model.safetensors, config.json, tokenizer.json, trainer_state.json...
+│   └── label_map.txt
+│   └── export/
+└── topic/
+  └── bertopic_model/    # dossier sauvegardé par BERTopic
+```
+
+Exemples de commandes pour extraire les archives :
+
+Windows (PowerShell) :
+```powershell
+Expand-Archive -Path sentiment_checkpoint-1236.zip -DestinationPath .\models\sentiment
+Expand-Archive -Path topic_bertopic.zip -DestinationPath .\models\topic
+```
+
+Linux / macOS :
+```bash
+unzip sentiment_checkpoint-1236.zip -d models/sentiment
+unzip topic_bertopic.zip -d models/topic
+```
+
+Après extraction, le code existant peut charger les modèles ainsi :
+
+Sentiment (Transformers) :
+```python
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+model_dir = "models/sentiment/checkpoint-1236"
+tokenizer = AutoTokenizer.from_pretrained(model_dir)
+model = AutoModelForSequenceClassification.from_pretrained(model_dir, local_files_only=True)
+```
+
+Remarque : si les poids sont en `model.safetensors`, `transformers` gère ce format si `safetensors` est installé.
+
+Topic (BERTopic) :
+```python
+from bertopic import BERTopic
+
+topic_model = BERTopic.load("models/topic/bertopic_model")
+```
+
+Conseils pratiques :
+- Demande aux destinataires de créer le dossier `models/sentiment` et `models/topic` à la racine du projet avant d'extraire.
+- Fournis un lien vers `label_map.txt` si nécessaire (souvent dans l'archive `sentiment`).
+
+### Liens de téléchargement des modèles
+
+- **Topic BERTopic** : https://drive.google.com/file/d/1d2rSvYSXCa5RLkZmzoM2CiFPNTIdtuov/view?usp=drive_link
+- **Sentiment checkpoint** : https://drive.google.com/file/d/1-RQTZuWMPgrhvrznGesma7TCwHCtclYJ/view?usp=drive_link
+
+> Après téléchargement, extraire le contenu dans les dossiers `models/sentiment` et `models/topic`.
 
 **Exemple d'utilisation avec GPU** :
 ```bash
@@ -369,7 +449,7 @@ docker-compose down
 → Modifie le port dans le script API : `app.run(port=5001)`
 
 ### Modèle ne charge pas
-→ Vérifie que `models/sentiment/pytorch_model.bin` existe
+→ Vérifie que `models/sentiment/checkpoint-1236/model.safetensors` (ou un checkpoint existant) existe
 → Réentraîne si nécessaire : `python src/train_nlp.py`
 
 ---
