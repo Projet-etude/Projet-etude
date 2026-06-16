@@ -1,5 +1,69 @@
-.env
-__pycache__/
-*.pyc
+# Environnement Python
 .venv/
 venv/
+env/
+ENV/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Variables d'environnement
+.env
+
+# Modèles IA
+models/
+checkpoint-*/
+
+# Fichiers de modèles
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.joblib
+*.pickle
+*.pkl
+
+# Fichiers temporaires d'entraînement
+trainer_state.json
+optimizer.pt
+scheduler.pt
+rng_state.pth
+training_args.bin
+
+# Sorties d'expériences
+runs/
+wandb/
+mlruns/
+
+# Données volumineuses (à adapter)
+data/raw/
+data/intermediate/
+data/*.csv
+data/**/*.csv
+
+data/*.parquet
+data/*.db
+
+# Fichiers temporaires
+tmp/
+temp/

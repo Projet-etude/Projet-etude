@@ -1,5 +1,14 @@
-requests 
+requests
 psycopg2-binary
 codecarbon
 pandas
-scikit-learn 
+scikit-learn
+transformers
+torch
+accelerate
+sentencepiece
+numpy
+flask
+flask-cors
+matplotlib
+bertopic[sentence-transformers]
