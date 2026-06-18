@@ -460,8 +460,8 @@ docker-compose down
 | **Data Engineer** | Fatima Amrouche | Extraction données, Etiquetage données, Nettoyage données |
 | **Data Scientist** | Anass Al Fatni | Etiquetage données, Fine-tuning ML , Back-end APIs |
 | **Data Scientist** | Chaymae Mansouri | Etiquetage données, Fine-tuning ML, métriques ML  |
-| **Data Analyst** | Madiha Lakhmiri | Etiquetage données, Analyse résultats, visualisations et rapports |
-| **Data Analyst** | Miriam El Qadi | Analyse résultats, Visualisation et rapports, Vidéo Projet |
+| **Data Analyst** | Madiha Lakhmiri | Etiquetage données, Analyse résultats, visualisations et rapports, Vidéo Projet |
+| **Data Analyst** | Miriam El Qadi | Analyse résultats, Visualisation et rapports |
 
 ---
 
@@ -547,10 +547,3 @@ python src/api_topic.py      # Terminal 2
 ```
 
 ---
-
-## 📞 Support
-
-- **Questions ML** → Anass AL FATNI / Chaymae MANSOURI
-- **Questions données** → Fatima AMROUCHE
-- **Questions intégration web** → Voir `API_INTEGRATION.md`
-- **Issues techniques** → Ouvrir une issue GitHub
