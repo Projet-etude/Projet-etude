@@ -4,8 +4,43 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 import re
+import requests
 from collections import Counter
 from pathlib import Path
+
+try:
+    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+    _vader = SentimentIntensityAnalyzer()
+    VADER_AVAILABLE = True
+except ImportError:
+    VADER_AVAILABLE = False
+
+def predict_local(text):
+    """Prediction locale via VADER (fallback sans API)."""
+    if not VADER_AVAILABLE:
+        return None
+    scores = _vader.polarity_scores(text)
+    compound = scores["compound"]
+    pos = scores["pos"]
+    neu = scores["neu"]
+    neg = scores["neg"]
+    if compound >= 0.05:
+        sentiment = "Positif"
+    elif compound <= -0.05:
+        sentiment = "Negatif"
+    else:
+        sentiment = "Neutre"
+    confidence = max(pos, neu, neg)
+    return {
+        "sentiment": sentiment,
+        "confidence": confidence,
+        "all_scores": [
+            {"label": "Positif", "score": pos},
+            {"label": "Neutre",  "score": neu},
+            {"label": "Negatif", "score": neg},
+        ],
+        "source": "local (VADER)",
+    }
 
 try:
     from wordcloud import WordCloud
@@ -121,7 +156,7 @@ with st.sidebar:
     st.markdown("## Bluesky Analytics")
     page = st.radio(
         "Navigation",
-        ["Vue d'ensemble", "Sentiments", "Topics", "Performance du modèle"],
+        ["Vue d'ensemble", "Sentiments", "Topics", "Performance du modèle", "Prediction en temps reel"],
         label_visibility="collapsed",
     )
 
@@ -577,3 +612,195 @@ elif page == "Performance du modèle":
         st.plotly_chart(fig_hist, use_container_width=True)
     else:
         st.info("Aucune donnée de confiance dans la sélection actuelle.")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE — PREDICTION EN TEMPS REEL
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "Prediction en temps reel":
+    st.markdown("## Prediction en temps reel")
+    st.caption("Tape n'importe quelle phrase — le modele detecte automatiquement son sentiment.")
+
+    API_URL = "http://localhost:5002"
+
+    # Check API status
+    api_ok = False
+    try:
+        r = requests.get(f"{API_URL}/health", timeout=2)
+        api_ok = r.status_code == 200
+    except Exception:
+        api_ok = False
+
+    col_s1, col_s2 = st.columns(2)
+    if api_ok:
+        col_s1.markdown(
+            "<span style='color:#a6e3a1;font-size:0.82rem'>Modele XLM-RoBERTa — API connectee (port 5002)</span>",
+            unsafe_allow_html=True,
+        )
+    else:
+        col_s1.markdown(
+            "<span style='color:#f38ba8;font-size:0.82rem'>API non demarree — utilisation du moteur local (VADER)</span>",
+            unsafe_allow_html=True,
+        )
+        if not VADER_AVAILABLE:
+            st.error("Ni l'API ni VADER ne sont disponibles. Lance : `python src/api_sentiment.py`")
+            st.stop()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Input
+    user_text = st.text_area(
+        "Entrez votre texte ici",
+        placeholder="Ex: This product is absolutely amazing and works perfectly!",
+        height=130,
+        max_chars=512,
+    )
+
+    col_btn, col_clear = st.columns([1, 5])
+    analyze = col_btn.button("Analyser", type="primary", disabled=(not api_ok and not VADER_AVAILABLE))
+    if col_clear.button("Effacer l'historique"):
+        st.session_state.pop("pred_history", None)
+        st.rerun()
+
+    SENT_ICON  = {"Positif": "POSITIF", "Neutre": "NEUTRE", "Negatif": "NEGATIF",
+                  "positive": "POSITIF", "neutral": "NEUTRE", "negative": "NEGATIF"}
+    SENT_CLASS = {"Positif": "c-pos", "Neutre": "c-neu", "Negatif": "c-neg",
+                  "positive": "c-pos", "neutral": "c-neu", "negative": "c-neg"}
+    LABEL_MAP  = {"positive": "Positif", "neutral": "Neutre", "negative": "Negatif",
+                  "Positif": "Positif", "Neutre": "Neutre", "Negatif": "Negatif",
+                  "Négatif": "Negatif"}
+
+    if analyze and user_text.strip():
+        with st.spinner("Analyse en cours..."):
+            try:
+                if api_ok:
+                    resp = requests.post(
+                        f"{API_URL}/predict",
+                        json={"text": user_text.strip()},
+                        timeout=15,
+                    )
+                    result = resp.json()
+                    result["source"] = "API (XLM-RoBERTa)"
+                else:
+                    result = predict_local(user_text.strip())
+
+                if result is None or "error" in result:
+                    st.error(f"Erreur : {result.get('error', 'Inconnue') if result else 'Aucun moteur disponible'}")
+                else:
+                    raw_sent    = result.get("sentiment", "Neutre")
+                    sentiment   = LABEL_MAP.get(raw_sent, raw_sent)
+                    confidence  = result.get("confidence", 0.0)
+                    all_scores  = result.get("all_scores", [])
+
+                    # Store in session history
+                    if "pred_history" not in st.session_state:
+                        st.session_state["pred_history"] = []
+                    st.session_state["pred_history"].insert(0, {
+                        "text": user_text.strip()[:80] + ("..." if len(user_text) > 80 else ""),
+                        "sentiment": sentiment,
+                        "confidence": confidence,
+                    })
+
+                    # Result display
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    source = result.get("source", "")
+                    r1, r2, r3, r4 = st.columns(4)
+                    r1.markdown(
+                        kpi(sentiment, "Sentiment detecte", SENT_CLASS.get(sentiment, "c-def")),
+                        unsafe_allow_html=True,
+                    )
+                    r2.markdown(
+                        kpi(f"{round(confidence * 100, 1)}%", "Confiance", "c-acc"),
+                        unsafe_allow_html=True,
+                    )
+                    r3.markdown(
+                        kpi(str(len(user_text.strip())), "Caracteres", "c-def"),
+                        unsafe_allow_html=True,
+                    )
+                    r4.markdown(
+                        kpi(source, "Moteur", "c-def"),
+                        unsafe_allow_html=True,
+                    )
+
+                    st.markdown("<br>", unsafe_allow_html=True)
+
+                    # Scores bar chart
+                    if all_scores:
+                        st.markdown("#### Scores par categorie")
+                        scores_data = [
+                            {
+                                "Sentiment": LABEL_MAP.get(s["label"], s["label"]),
+                                "Score": round(s["score"] * 100, 1),
+                            }
+                            for s in all_scores
+                        ]
+                        scores_df = pd.DataFrame(scores_data).sort_values("Score", ascending=True)
+                        bar_colors = [
+                            SENTIMENT_COLORS.get(row["Sentiment"], "#cdd6f4")
+                            for _, row in scores_df.iterrows()
+                        ]
+                        fig_scores = go.Figure(go.Bar(
+                            y=scores_df["Sentiment"],
+                            x=scores_df["Score"],
+                            orientation="h",
+                            marker_color=bar_colors,
+                            text=[f"{v}%" for v in scores_df["Score"]],
+                            textposition="outside",
+                        ))
+                        fig_scores.update_layout(
+                            **LAYOUT, height=200,
+                            xaxis=dict(range=[0, 105], ticksuffix="%", gridcolor="#313244"),
+                        )
+                        st.plotly_chart(fig_scores, use_container_width=True)
+
+                    # Gauge de confiance
+                    st.markdown("#### Jauge de confiance")
+                    gauge_color = SENTIMENT_COLORS.get(sentiment, "#cdd6f4")
+                    fig_gauge = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=round(confidence * 100, 1),
+                        number={"suffix": "%", "font": {"color": "#cdd6f4", "size": 28}},
+                        gauge=dict(
+                            axis=dict(range=[0, 100], tickcolor="#313244",
+                                      tickfont=dict(color="#a6adc8")),
+                            bar=dict(color=gauge_color),
+                            bgcolor="#1e1e2e",
+                            bordercolor="#313244",
+                            steps=[
+                                dict(range=[0, 50],  color="#181825"),
+                                dict(range=[50, 75], color="#1e1e2e"),
+                                dict(range=[75, 100], color="#181825"),
+                            ],
+                        ),
+                    ))
+                    fig_gauge.update_layout(
+                        **LAYOUT, height=250,
+                        font=dict(color="#cdd6f4"),
+                    )
+                    st.plotly_chart(fig_gauge, use_container_width=True)
+
+            except requests.exceptions.Timeout:
+                st.error("L'API met trop de temps a repondre. Verifie qu'elle est bien lancee.")
+            except Exception as e:
+                st.error(f"Erreur : {e}")
+
+    elif analyze and not user_text.strip():
+        st.warning("Veuillez entrer un texte avant d'analyser.")
+
+    # Historique des predictions
+    if st.session_state.get("pred_history"):
+        st.markdown("---")
+        st.markdown("#### Historique de la session")
+        hist_df = pd.DataFrame(st.session_state["pred_history"])
+        hist_df.columns = ["Texte", "Sentiment", "Confiance"]
+        hist_df["Confiance"] = hist_df["Confiance"].apply(lambda x: f"{round(x*100,1)}%")
+
+        row_tones = []
+        tone_map = {"Positif": "success", "Neutre": "info", "Negatif": "danger"}
+        for _, row in hist_df.iterrows():
+            row_tones.append(tone_map.get(row["Sentiment"]))
+
+        st.dataframe(
+            hist_df,
+            use_container_width=True,
+            hide_index=True,
+        )
