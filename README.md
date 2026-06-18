@@ -232,11 +232,11 @@ models/sentiment/
   └── training_metrics.png
 ```
 
-Note : le checkpoint `checkpoint-1236` est le plus récent — pour partager le modèle, zippe ce dossier (`models/sentiment/checkpoint-1236`) et fournis le lien au reste de l'équipe.
+Note : le checkpoint `checkpoint-1236` est le plus récent, téléchargez le zip fournit dans le lien ci-dessous et utilisez le directement.
 
 ## 🔒 Modèles externes (non poussés dans le dépôt)
 
-Les fichiers de modèles (checkpoints, poids) sont volumineux et ne sont pas inclus dans le repo. Fournis des liens (Google Drive / OneDrive / Dropbox) vers les archives `.zip` et demande aux membres de :
+Les fichiers de modèles (checkpoints, poids) sont volumineux et ne sont pas inclus dans le repo, ils sont fourni comme lien google drive ci-dessous pour les télécharger.
 
 - télécharger l'archive fournie
 - la décompresser dans le répertoire du projet en respectant l'arborescence ci-dessous
@@ -288,8 +288,7 @@ topic_model = BERTopic.load("models/topic/bertopic_model")
 ```
 
 Conseils pratiques :
-- Demande aux destinataires de créer le dossier `models/sentiment` et `models/topic` à la racine du projet avant d'extraire.
-- Fournis un lien vers `label_map.txt` si nécessaire (souvent dans l'archive `sentiment`).
+- Créer le dossier `models/sentiment` et `models/topic` à la racine du projet avant d'extraire.
 
 ### Liens de téléchargement des modèles
 
@@ -446,7 +445,7 @@ docker-compose down
 → Modifie dans `api_sentiment.py` : remplace `device=0` par `device=-1` (CPU)
 
 ### Port déjà utilisé
-→ Modifie le port dans le script API : `app.run(port=5001)`
+→ Modifie le port dans le script API : `app.run(port=5002)`
 
 ### Modèle ne charge pas
 → Vérifie que `models/sentiment/checkpoint-1236/model.safetensors` (ou un checkpoint existant) existe
@@ -458,11 +457,11 @@ docker-compose down
 
 | Rôle | Personne | Responsabilité |
 |------|----------|-----------------|
-| **Data Scientist** | Anass Al Fatni | Fine-tuning ML, APIs, métriques |
-| **Data Scientist** | Chaymae Mansouri | Étiquetage données, validation |
-| **Data Engineer** | Fatima Amrouche | Infrastructure, pipeline ETL |
-| **Data Analyst** | Madiha Lakhmiri | Analyse résultats, rapports |
-| **Data Scientist** | Miriam El Qadi | Feature engineering, modèles |
+| **Data Engineer** | Fatima Amrouche | Extraction données, Etiquetage données, Nettoyage données |
+| **Data Scientist** | Anass Al Fatni | Etiquetage données, Fine-tuning ML , Back-end APIs |
+| **Data Scientist** | Chaymae Mansouri | Etiquetage données, Fine-tuning ML, métriques ML  |
+| **Data Analyst** | Madiha Lakhmiri | Etiquetage données, Analyse résultats, visualisations et rapports, Vidéo Projet |
+| **Data Analyst** | Miriam El Qadi | Analyse résultats, Visualisation et rapports |
 
 ---
 
@@ -496,7 +495,7 @@ docker-compose down
 └──────────────────┬──────────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────────┐
-│ 3. ML (🔴 Anass)                                        │
+│ 3. ML                                        │
 │    train_nlp.py → models/ + metrics + diagrammes        │
 └──────────────────┬──────────────────────────────────────┘
                    │
@@ -548,10 +547,3 @@ python src/api_topic.py      # Terminal 2
 ```
 
 ---
-
-## 📞 Support
-
-- **Questions ML** → Anass Al Fatni
-- **Questions données** → Équipe Data
-- **Questions intégration web** → Voir `API_INTEGRATION.md`
-- **Issues techniques** → Ouvrir une issue GitHub

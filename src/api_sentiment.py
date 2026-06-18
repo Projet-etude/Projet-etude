@@ -18,8 +18,10 @@ from transformers import pipeline
 app = Flask(__name__)
 CORS(app)  # Autoriser les requêtes cross-origin
 
-# Configuration
-MODEL_DIR = "models/sentiment"
+# Configuration des chemins en fonction du dossier du script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, os.pardir))
+MODEL_DIR = os.path.join(PROJECT_ROOT, "models", "sentiment")
 EXPORT_DIR = os.path.join(MODEL_DIR, "export")
 CONFIG_FILE = os.path.join(EXPORT_DIR, "config.json")
 
@@ -38,6 +40,9 @@ tokenizer = AutoTokenizer.from_pretrained(config["tokenizer"])
 # Résoudre le chemin du modèle à charger : utiliser le dossier indiqué,
 # sinon chercher le dernier checkpoint ou le dossier d'export
 model_path_to_load = config.get("model_path", MODEL_DIR)
+if not os.path.isabs(model_path_to_load):
+    model_path_to_load = os.path.join(PROJECT_ROOT, model_path_to_load)
+
 if not os.path.exists(os.path.join(model_path_to_load, "config.json")):
     # Chercher des sous-dossiers checkpoint-*
     candidates = []
@@ -202,4 +207,4 @@ def info():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

@@ -17,7 +17,7 @@ models/
     ├── label_map.txt              # Mapping des labels
     ├── trainer_state.json         # Historique d'entraînement
     └── export/
-        ├── config.json            # Config pour l'API (⭐ IMPORTANT)
+        ├── config.json            # Config pour l'API (IMPORTANT)
         ├── metrics.json           # Métriques finales en JSON
         ├── training_loss.png      # Courbe de loss d'entraînement
         └── training_metrics.png   # Courbes d'évaluation (Accuracy, F1, etc.)
@@ -281,6 +281,3 @@ MODEL_DIR = os.getenv("MODEL_DIR", "models/sentiment")
 
 ---
 
-## 📞 Contact
-
-Pour des questions sur l'API ML, contacte **Anass Al Fatni** (Data Scientist).

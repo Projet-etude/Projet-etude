@@ -2,16 +2,7 @@
 
 Ce document décrit le workflow complet pour passer du fine-tuning du modèle à son intégration dans l'application web.
 
----
 
-## 🎯 Objectif
-
-1. **Anass** (Data Scientist) fine-tune le modèle de sentiment
-2. L'API ML expose le modèle via REST
-3. **Équipe Web** intègre l'API dans l'interface web
-4. Affichage : prédiction sentiment + topic + diagrammes d'entraînement
-
----
 
 ## ⚙️ Phase 1 : Fine-tuning & Préparation (ML)
 
@@ -337,10 +328,5 @@ export default function AnalyzePanel() {
 ```
 
 ---
-
-## 📞 Contacts
-
-- **Anass Al Fatni** (Data Scientist) : Fine-tuning, APIs ML
-- **Équipe Web** : Intégration Frontend
 
 Pour des questions : voir `API_INTEGRATION.md`
