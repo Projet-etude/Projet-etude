@@ -1,5 +1,5 @@
 {
-  "model_path": "C:\\Users\\anass\\Projet-etude\\models\\sentiment",
+  "model_path": "models/sentiment/checkpoint-1236",
   "model_type": "sentiment_classifier",
   "tokenizer": "cardiffnlp/twitter-roberta-base-sentiment-latest",
   "labels": [

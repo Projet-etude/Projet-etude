@@ -12,3 +12,7 @@ flask
 flask-cors
 matplotlib
 bertopic[sentence-transformers]
+streamlit
+plotly
+wordcloud
+safetensors
