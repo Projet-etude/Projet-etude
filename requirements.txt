@@ -15,6 +15,4 @@ bertopic[sentence-transformers]
 streamlit
 plotly
 wordcloud
-vaderSentiment
-langdetect
 safetensors

@@ -8,39 +8,6 @@ import requests
 from collections import Counter
 from pathlib import Path
 
-try:
-    from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-    _vader = SentimentIntensityAnalyzer()
-    VADER_AVAILABLE = True
-except ImportError:
-    VADER_AVAILABLE = False
-
-def predict_local(text):
-    """Prediction locale via VADER (fallback sans API)."""
-    if not VADER_AVAILABLE:
-        return None
-    scores = _vader.polarity_scores(text)
-    compound = scores["compound"]
-    pos = scores["pos"]
-    neu = scores["neu"]
-    neg = scores["neg"]
-    if compound >= 0.05:
-        sentiment = "Positif"
-    elif compound <= -0.05:
-        sentiment = "Negatif"
-    else:
-        sentiment = "Neutre"
-    confidence = max(pos, neu, neg)
-    return {
-        "sentiment": sentiment,
-        "confidence": confidence,
-        "all_scores": [
-            {"label": "Positif", "score": pos},
-            {"label": "Neutre",  "score": neu},
-            {"label": "Negatif", "score": neg},
-        ],
-        "source": "local (VADER)",
-    }
 
 try:
     from wordcloud import WordCloud
@@ -633,17 +600,12 @@ elif page == "Prediction en temps reel":
     col_s1, col_s2 = st.columns(2)
     if api_ok:
         col_s1.markdown(
-            "<span style='color:#a6e3a1;font-size:0.82rem'>Modele XLM-RoBERTa — API connectee (port 5002)</span>",
+            "<span style='color:#a6e3a1;font-size:0.82rem'>Modele checkpoint-1236 — API connectee (port 5002)</span>",
             unsafe_allow_html=True,
         )
     else:
-        col_s1.markdown(
-            "<span style='color:#f38ba8;font-size:0.82rem'>API non demarree — utilisation du moteur local (VADER)</span>",
-            unsafe_allow_html=True,
-        )
-        if not VADER_AVAILABLE:
-            st.error("Ni l'API ni VADER ne sont disponibles. Lance : `python src/api_sentiment.py`")
-            st.stop()
+        st.error("L'API n'est pas demarree. Lance : `python src/api_sentiment.py`")
+        st.stop()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -656,7 +618,7 @@ elif page == "Prediction en temps reel":
     )
 
     col_btn, col_clear = st.columns([1, 5])
-    analyze = col_btn.button("Analyser", type="primary", disabled=(not api_ok and not VADER_AVAILABLE))
+    analyze = col_btn.button("Analyser", type="primary")
     if col_clear.button("Effacer l'historique"):
         st.session_state.pop("pred_history", None)
         st.rerun()
@@ -672,19 +634,16 @@ elif page == "Prediction en temps reel":
     if analyze and user_text.strip():
         with st.spinner("Analyse en cours..."):
             try:
-                if api_ok:
-                    resp = requests.post(
-                        f"{API_URL}/predict",
-                        json={"text": user_text.strip()},
-                        timeout=15,
-                    )
-                    result = resp.json()
-                    result["source"] = "API (XLM-RoBERTa)"
-                else:
-                    result = predict_local(user_text.strip())
+                resp = requests.post(
+                    f"{API_URL}/predict",
+                    json={"text": user_text.strip()},
+                    timeout=15,
+                )
+                result = resp.json()
+                result["source"] = "checkpoint-1236"
 
-                if result is None or "error" in result:
-                    st.error(f"Erreur : {result.get('error', 'Inconnue') if result else 'Aucun moteur disponible'}")
+                if "error" in result:
+                    st.error(f"Erreur API : {result.get('error', 'Inconnue')}")
                 else:
                     raw_sent    = result.get("sentiment", "Neutre")
                     sentiment   = LABEL_MAP.get(raw_sent, raw_sent)
